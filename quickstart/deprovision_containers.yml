@@ -1,0 +1,40 @@
+---
+- name: Deprovision Log4j Containers
+  hosts: target
+  become: yes
+  tasks:
+    - name: Stop and remove Log4j containers
+      ansible.builtin.docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - log4j_v1
+        - log4j_v2
+        - log4j_v3
+
+    - name: Remove Log4j version files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /opt/logs1/log4j_version.txt
+        - /opt/logs2/log4j_version.txt
+        - /opt/logs3/log4j_version.txt
+
+    - name: Remove Log4j volume directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /opt/logs1
+        - /opt/logs2
+        - /opt/logs3
+
+    - name: Optionally remove Docker images (optional, uncomment if needed)
+      ansible.builtin.command:
+        cmd: "docker rmi {{ item }}"
+      loop:
+        - openjdk:8
+        - openjdk:11
+        - openjdk:17
+      ignore_errors: true  # Prevent errors if images are in use elsewhere
