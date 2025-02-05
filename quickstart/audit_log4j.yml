@@ -1,6 +1,6 @@
 ---
 - name: Deploy Log4j Containers
-  hosts: target
+  hosts: all
   become: yes
   tasks:
     - name: Install Docker (if not installed)

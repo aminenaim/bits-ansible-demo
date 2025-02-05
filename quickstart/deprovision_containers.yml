@@ -1,6 +1,6 @@
 ---
 - name: Deprovision Log4j Containers
-  hosts: target
+  hosts: all
   become: yes
   tasks:
     - name: Stop and remove Log4j containers
