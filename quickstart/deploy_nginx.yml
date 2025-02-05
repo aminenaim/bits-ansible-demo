@@ -1,0 +1,30 @@
+---
+- name: Deploy Nginx Web Server
+  hosts: all
+  become: yes
+  vars:
+    web_content: "Welcome to my Ansible Demo!"
+  
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.package:
+        name: nginx
+        state: present
+
+    - name: Deploy Custom Index Page
+      ansible.builtin.template:
+        src: index.html.j2
+        dest: /var/www/html/index.html
+      notify: Restart Nginx
+
+    - name: Ensure Nginx is Running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
