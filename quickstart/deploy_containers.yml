@@ -1,0 +1,47 @@
+---
+- name: Deploy Log4j Containers
+  hosts: target
+  become: yes
+  tasks:
+    - name: Install Docker (if not installed)
+      ansible.builtin.package:
+        name: docker
+        state: present
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ensure required images are pulled
+      ansible.builtin.docker_image:
+        name: "{{ item.image }}"
+        source: pull
+      loop:
+        - { image: "openjdk:8" }
+        - { image: "openjdk:11" }
+        - { image: "openjdk:17" }
+
+    - name: Deploy Log4j containers with different versions
+      ansible.builtin.docker_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        state: started
+        restart_policy: always
+        volumes:
+          - "{{ item.volume }}"
+        command: sleep infinity
+      loop:
+        - { name: "log4j_v1", image: "openjdk:8", volume: "/opt/logs1:/logs" }
+        - { name: "log4j_v2", image: "openjdk:11", volume: "/opt/logs2:/logs" }
+        - { name: "log4j_v3", image: "openjdk:17", volume: "/opt/logs3:/logs" }
+
+    - name: Add vulnerable Log4j versions in containers
+      ansible.builtin.copy:
+        dest: "{{ item.dest }}"
+        content: "{{ item.version }}"
+      loop:
+        - { dest: "/opt/logs1/log4j_version.txt", version: "log4j-2.14.1" }
+        - { dest: "/opt/logs2/log4j_version.txt", version: "log4j-2.15.0" }
+        - { dest: "/opt/logs3/log4j_version.txt", version: "log4j-2.17.1" }
