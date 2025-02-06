@@ -30,11 +30,3 @@
         - /opt/logs2
         - /opt/logs3
 
-    - name: Optionally remove Docker images (optional, uncomment if needed)
-      ansible.builtin.command:
-        cmd: "docker rmi {{ item }}"
-      loop:
-        - openjdk:8
-        - openjdk:11
-        - openjdk:17
-      ignore_errors: true  # Prevent errors if images are in use elsewhere
